@@ -53,38 +53,46 @@
 <body>
     <h1>Live Camera Stream</h1>
     <video id="video" autoplay playsinline></video>
-    <button id="stop">Stop Camera</button>
+    <button id="start">Start Camera</button>
+    <button id="stop" style="display: none;">Stop Camera</button>
     <p class="error" id="error"></p>
 
     <script>
         const videoElement = document.getElementById('video');
+        const startButton = document.getElementById('start');
         const stopButton = document.getElementById('stop');
         const errorElement = document.getElementById('error');
 
         let stream;
 
-        // Start the camera stream
         async function startCamera() {
             try {
                 stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 videoElement.srcObject = stream;
+                startButton.style.display = 'none';
+                stopButton.style.display = 'block';
+                errorElement.textContent = '';
             } catch (err) {
                 errorElement.textContent = 'Error accessing camera: ' + err.message;
+                console.error('Error accessing camera:', err);
             }
         }
-
-        // Stop the camera stream
         function stopCamera() {
             if (stream) {
                 stream.getTracks().forEach(track => track.stop());
                 videoElement.srcObject = null;
+                startButton.style.display = 'block';
+                stopButton.style.display = 'none';
             }
         }
 
+        startButton.addEventListener('click', startCamera);
         stopButton.addEventListener('click', stopCamera);
 
-        // Start camera on page load
-        startCamera();
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            errorElement.textContent = 'Your browser does not support accessing the camera.';
+            startButton.disabled = true;
+        }
     </script>
 </body>
 </html>
